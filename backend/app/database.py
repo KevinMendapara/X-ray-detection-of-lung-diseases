@@ -3,9 +3,7 @@ import sqlite3
 import json
 import datetime
 from typing import Optional, List, Dict, Any
-
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "tb_detect.db"))
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+from .storage import DB_PATH
 
 def dict_factory(cursor, row):
     d = {}

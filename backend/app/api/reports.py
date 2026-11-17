@@ -21,20 +21,21 @@ try:
     from backend.app.database import DBManager
     from backend.app.services.pdf_generator import generate_pdf_report
     from backend.app.api.auth import get_current_user
+    from backend.app.storage import UPLOAD_DIR, REPORTS_DIR
 except (ImportError, ValueError):
     try:
         from app.database import DBManager
         from app.services.pdf_generator import generate_pdf_report
         from app.api.auth import get_current_user
+        from app.storage import UPLOAD_DIR, REPORTS_DIR
     except (ImportError, ValueError):
         from database import DBManager
         from services.pdf_generator import generate_pdf_report
         from api.auth import get_current_user
+        from storage import UPLOAD_DIR, REPORTS_DIR
 
 router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
-REPORTS_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "reports"))
-UPLOAD_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "uploads"))
 
 @router.get("")
 def list_reports(

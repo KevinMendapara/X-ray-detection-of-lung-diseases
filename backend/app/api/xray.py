@@ -19,15 +19,18 @@ try:
     from backend.app.database import DBManager
     from backend.app.services.ml_engine import get_ml_engine
     from backend.app.services.pdf_generator import generate_pdf_report
+    from backend.app.storage import UPLOAD_DIR, REPORTS_DIR
 except (ImportError, ValueError):
     try:
         from app.database import DBManager
         from app.services.ml_engine import get_ml_engine
         from app.services.pdf_generator import generate_pdf_report
+        from app.storage import UPLOAD_DIR, REPORTS_DIR
     except (ImportError, ValueError):
         from database import DBManager
         from services.ml_engine import get_ml_engine
         from services.pdf_generator import generate_pdf_report
+        from storage import UPLOAD_DIR, REPORTS_DIR
 
 router = APIRouter(prefix="/api/xray", tags=["X-Ray Analysis"])
 
@@ -73,8 +76,6 @@ def assess_image_quality(path, ext=None):
     return {"quality_status": status, "quality_checks": checks, "image_dimensions": {"width": width, "height": height}, "quality_advisory": "Automated technical checks are heuristic and do not determine whether an image is diagnostically adequate."}
 
 
-UPLOAD_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "uploads"))
-REPORTS_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "reports"))
 SAMPLE_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "ml", "data", "sample_xrays"))
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)

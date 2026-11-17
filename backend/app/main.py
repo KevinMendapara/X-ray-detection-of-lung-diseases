@@ -23,6 +23,7 @@ try:
     from backend.app.api.reports import router as reports_router
     from backend.app.api.admin import router as admin_router, fetch_dashboard_stats
     from backend.app.api.contact import router as contact_router
+    from backend.app.storage import UPLOAD_DIR, REPORTS_DIR
 except (ImportError, ValueError):
     try:
         from app.database import init_db, DBManager
@@ -32,6 +33,7 @@ except (ImportError, ValueError):
         from app.api.reports import router as reports_router
         from app.api.admin import router as admin_router, fetch_dashboard_stats
         from app.api.contact import router as contact_router
+        from app.storage import UPLOAD_DIR, REPORTS_DIR
     except (ImportError, ValueError):
         from database import init_db, DBManager
         from api.auth import router as auth_router, hash_password
@@ -40,6 +42,7 @@ except (ImportError, ValueError):
         from api.reports import router as reports_router
         from api.admin import router as admin_router, fetch_dashboard_stats
         from api.contact import router as contact_router
+        from storage import UPLOAD_DIR, REPORTS_DIR
 
 # Initialize database tables
 init_db()
@@ -51,17 +54,24 @@ app = FastAPI(
 )
 
 # CORS configuration
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000",
+    ).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX") or None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Uploads and reports static mounts
-UPLOAD_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "uploads"))
-REPORTS_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "reports"))
 FRONTEND_DIST = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "frontend", "dist"))
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
