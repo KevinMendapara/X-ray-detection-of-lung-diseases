@@ -1,0 +1,28 @@
+# Local secrets and environment configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python runtime and generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/
+
+# Local clinical records and generated artifacts
+backend/data/*.db
+backend/uploads/*
+backend/reports/*
+
+# Medical image datasets and trained model weights
+ml/data/
+ml/processed_dataset/
+frontend/public/sample_xrays/
+backend/models/*.h5
+backend/models/*.joblib
