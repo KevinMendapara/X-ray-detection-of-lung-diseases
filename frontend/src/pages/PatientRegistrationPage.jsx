@@ -70,7 +70,16 @@ export default function PatientRegistrationPage() {
       });
       setRegisteredPatient(result);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Patient registration could not be completed. Please try again.');
+      const detail = err.response?.data?.detail;
+      const validationMessage = Array.isArray(detail)
+        ? detail.map((issue) => issue.msg).filter(Boolean).join(' ')
+        : null;
+      const message = typeof detail === 'string' ? detail : validationMessage;
+      setError(
+        message || (err.response?.status
+          ? `The registration service returned HTTP ${err.response.status}. Please retry, and contact support if it continues.`
+          : 'Could not reach the registration service. Check that the backend is running, then try again.')
+      );
     } finally {
       setLoading(false);
     }
