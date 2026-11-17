@@ -75,9 +75,12 @@ export default function PatientRegistrationPage() {
         ? detail.map((issue) => issue.msg).filter(Boolean).join(' ')
         : null;
       const message = typeof detail === 'string' ? detail : validationMessage;
+      const requestPath = `${err.config?.baseURL || ''}${err.config?.url || ''}` || '/api/patients';
       setError(
-        message || (err.response?.status
-          ? `The registration service returned HTTP ${err.response.status}. Please retry, and contact support if it continues.`
+        message || (err.response?.status === 404
+          ? `HTTP 404 from POST ${requestPath}. This backend does not recognize the registration route; restart the backend and refresh the page.`
+          : err.response?.status
+          ? `Registration request POST ${requestPath} returned HTTP ${err.response.status}. Please retry, and contact support if it continues.`
           : 'Could not reach the registration service. Check that the backend is running, then try again.')
       );
     } finally {
