@@ -4,7 +4,7 @@ import {
   AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2, Clock3,
   Download, Eye, FileText, RefreshCw, ShieldAlert, UserRound
 } from 'lucide-react';
-import { reportsAPI } from '../services/api';
+import { reportsAPI, resolveBackendUrl } from '../services/api';
 import './ResultsPage.css';
 
 export default function ResultsPage() {
@@ -20,7 +20,7 @@ export default function ResultsPage() {
     setError('');
     reportsAPI.getById(id)
       .then((data) => { if (active) setReport(data); })
-      .catch(() => { if (active) setError('Could not retrieve this analysis result. It may not exist.'); })
+      .catch((err) => { if (active) setError(err.response?.data?.detail || 'Could not retrieve this analysis result. It may no longer be stored on the backend.'); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id]);
@@ -42,7 +42,7 @@ export default function ResultsPage() {
         <div className="results-actions">
           <Link to={`/gradcam/${id}`} className="results-action results-action-teal"><Eye size={15} /><span>Explainability</span></Link>
           <Link to={`/report/${id}`} className="results-action results-action-primary"><FileText size={15} /><span>Full report</span></Link>
-          <a href={report.pdf_download_url} target="_blank" rel="noreferrer" className="results-action results-action-quiet"><Download size={15} /><span>PDF</span></a>
+          <a href={resolveBackendUrl(report.pdf_download_url)} target="_blank" rel="noreferrer" className="results-action results-action-quiet"><Download size={15} /><span>PDF</span></a>
         </div>
       </div>
 
@@ -74,9 +74,9 @@ export default function ResultsPage() {
       <section className="results-images-card">
         <div className="results-images-heading"><div><h2>Image comparison</h2><p>Original image, normalized input, and model attention overlay</p></div><span>224 × 224 analysis input</span></div>
         <div className="results-image-grid">
-          <figure><div className="result-image-frame"><img src={xray.original_image_url} alt="Original chest radiograph" /></div><figcaption><span>01</span> Original radiograph <small>{xray.quality_status}</small></figcaption></figure>
-          <figure><div className="result-image-frame"><img src={xray.processed_image_url} alt="Normalized chest radiograph" /></div><figcaption><span>02</span> Normalized input <small>Contrast adjusted</small></figcaption></figure>
-          <figure><div className="result-image-frame"><img src={xray.overlay_image_url} alt="Grad-CAM attention overlay" /></div><figcaption><span>03</span> Attention overlay <small>Grad-CAM++</small></figcaption></figure>
+          <figure><div className="result-image-frame"><img src={resolveBackendUrl(xray.original_image_url)} alt="Original chest radiograph" /></div><figcaption><span>01</span> Original radiograph <small>{xray.quality_status}</small></figcaption></figure>
+          <figure><div className="result-image-frame"><img src={resolveBackendUrl(xray.processed_image_url)} alt="Normalized chest radiograph" /></div><figcaption><span>02</span> Normalized input <small>Contrast adjusted</small></figcaption></figure>
+          <figure><div className="result-image-frame"><img src={resolveBackendUrl(xray.overlay_image_url)} alt="Grad-CAM attention overlay" /></div><figcaption><span>03</span> Attention overlay <small>Grad-CAM++</small></figcaption></figure>
         </div>
       </section>
 

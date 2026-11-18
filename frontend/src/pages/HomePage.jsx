@@ -1,29 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   UploadCloud, Activity, ShieldCheck, Cpu, Eye,
   FileCheck2, Database, ArrowRight, CheckCircle2, ChevronRight,
   TrendingUp, Microscope, Stethoscope, AlertTriangle
 } from 'lucide-react';
-import { adminAPI } from '../services/api';
 
 export default function HomePage() {
-  const [stats, setStats] = useState({
-    total_patients: 3,
-    total_analyses: 0,
-    model_accuracy_pct: 100,
-    model_sensitivity_pct: 100,
-    model_specificity_pct: 100
-  });
-
-  useEffect(() => {
-    adminAPI.getStats()
-      .then(data => {
-        if (data.kpis) setStats(data.kpis);
-      })
-      .catch(() => {});
-  }, []);
-
   return (
     <div className="space-y-16">
       
@@ -123,38 +106,12 @@ export default function HomePage() {
 
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                     <span>Target: Pulmonary TB</span>
-                    <span className="font-bold text-[#1769AA]">Hold-out Accuracy: {stats.model_accuracy_pct}%</span>
+                    <span className="font-bold text-[#1769AA]">DenseNet121 + SVM</span>
                   </div>
                 </div>
               </div>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* Verified System Statistics */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="health-card p-5 text-center">
-            <div className="text-3xl font-extrabold text-[#1769AA]">{stats.model_accuracy_pct}%</div>
-            <div className="text-xs font-semibold text-slate-700 mt-1">Verified Test Accuracy</div>
-            <div className="text-[10px] text-slate-400">Independent ICMR Hold-out Set</div>
-          </div>
-          <div className="health-card p-5 text-center">
-            <div className="text-3xl font-extrabold text-[#17A2A4]">{stats.model_sensitivity_pct}%</div>
-            <div className="text-xs font-semibold text-slate-700 mt-1">Clinical Sensitivity</div>
-            <div className="text-[10px] text-slate-400">True Positive TB Detection Rate</div>
-          </div>
-          <div className="health-card p-5 text-center">
-            <div className="text-3xl font-extrabold text-indigo-600">{stats.model_specificity_pct}%</div>
-            <div className="text-xs font-semibold text-slate-700 mt-1">Clinical Specificity</div>
-            <div className="text-[10px] text-slate-400">True Negative Control Rate</div>
-          </div>
-          <div className="health-card p-5 text-center">
-            <div className="text-3xl font-extrabold text-emerald-600">684</div>
-            <div className="text-xs font-semibold text-slate-700 mt-1">ICMR CXR Cohort</div>
-            <div className="text-[10px] text-slate-400">Indian National TB Registry</div>
           </div>
         </div>
       </section>

@@ -4,7 +4,7 @@ import {
   Eye, ArrowLeft, Download, ShieldAlert, Sliders,
   Layers, Info, FileText, CheckCircle2, AlertTriangle, RefreshCw
 } from 'lucide-react';
-import { xrayAPI, reportsAPI } from '../services/api';
+import { xrayAPI, reportsAPI, resolveBackendUrl } from '../services/api';
 
 export default function GradCamPage() {
   const { id } = useParams();
@@ -84,7 +84,7 @@ export default function GradCamPage() {
 
         <div className="flex items-center gap-2">
           <a
-            href={analysis.xray.overlay_image_url}
+            href={resolveBackendUrl(analysis.xray.overlay_image_url)}
             download={`gradcam_overlay_${analysis.patient.id}.png`}
             className="btn-outline text-xs px-3.5 py-2"
           >
@@ -167,7 +167,7 @@ export default function GradCamPage() {
                     </div>
                     <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-900 aspect-square flex items-center justify-center">
                       <img
-                        src={analysis.xray.processed_image_url}
+                        src={resolveBackendUrl(analysis.xray.processed_image_url)}
                         alt="Original CXR"
                         className="w-full h-full object-contain"
                       />
@@ -182,7 +182,7 @@ export default function GradCamPage() {
                     </div>
                     <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-900 aspect-square flex items-center justify-center">
                       <img
-                        src={analysis.xray.overlay_image_url}
+                        src={resolveBackendUrl(analysis.xray.overlay_image_url)}
                         alt="Grad-CAM++ Overlay"
                         className="w-full h-full object-contain"
                       />
@@ -201,13 +201,13 @@ export default function GradCamPage() {
                 <div className="relative mx-auto max-w-md aspect-square rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center">
                   {/* Under layer: Original CXR */}
                   <img
-                    src={analysis.xray.processed_image_url}
+                    src={resolveBackendUrl(analysis.xray.processed_image_url)}
                     alt="Under CXR"
                     className="absolute inset-0 w-full h-full object-contain"
                   />
                   {/* Over layer: Pure Heatmap with dynamic opacity */}
                   <img
-                    src={analysis.xray.heatmap_image_url}
+                    src={resolveBackendUrl(analysis.xray.heatmap_image_url)}
                     alt="Overlay Heatmap"
                     style={{ opacity: overlayOpacity / 100 }}
                     className="absolute inset-0 w-full h-full object-contain mix-blend-screen transition-opacity"
@@ -223,7 +223,7 @@ export default function GradCamPage() {
               <div className="space-y-4">
                 <div className="mx-auto max-w-md aspect-square rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center">
                   <img
-                    src={analysis.xray.heatmap_image_url}
+                    src={resolveBackendUrl(analysis.xray.heatmap_image_url)}
                     alt="Pure Grad-CAM++ Heatmap"
                     className="w-full h-full object-contain"
                   />

@@ -5,7 +5,7 @@ import {
   CalendarClock, CheckCircle2, CircleHelp, Download, Eye, FileText,
   RefreshCw, Search, ShieldAlert, SlidersHorizontal, UploadCloud, UserRound, X
 } from 'lucide-react';
-import { reportsAPI } from '../services/api';
+import { reportsAPI, resolveBackendUrl } from '../services/api';
 import './HistoryPage.css';
 
 const filters = [
@@ -120,7 +120,7 @@ export default function HistoryPage() {
                   <div className="record-topline"><div className="record-date"><span>{date.date}</span><i />{date.time && <span>{date.time}</span>}</div><span className={`record-status record-status-${status}`}>{status === 'risk' ? <AlertTriangle size={13} /> : status === 'uncertain' ? <CircleHelp size={13} /> : <CheckCircle2 size={13} />}{report.prediction}</span></div>
                   <div className="record-patient"><div className={`record-avatar record-avatar-${status}`}>{initials(report.patient_name)}</div><div className="record-patient-info"><strong>{report.patient_name || 'Patient'}</strong><span>{report.patient_id} <i /> {report.patient_age || '—'} yrs · {report.patient_gender || '—'}</span></div><div className="record-id">AR-{String(report.id).padStart(5, '0')}</div></div>
                   <div className="record-confidence"><div><span>Model confidence</span><strong>{confidence}%</strong></div><div className="record-meter"><span style={{ width: `${confidence}%` }} /></div></div>
-                  <div className="record-footer"><span className="record-model">{report.model_version?.includes('Grad-CAM++') ? 'DenseNet121 · RBF-SVM' : (report.model_version || 'CXR analysis')}</span><div className="record-actions"><Link to={`/gradcam/${report.id}`} title="Open Grad-CAM++" aria-label={`Open Grad-CAM++ for ${report.patient_name}`}><Eye size={15} /></Link><Link to={`/report/${report.id}`} title="Open report" aria-label={`Open report for ${report.patient_name}`}><FileText size={15} /></Link><a href={report.pdf_url} target="_blank" rel="noreferrer" title="Download PDF" aria-label={`Download PDF for ${report.patient_name}`}><Download size={15} /></a><Link to={`/results/${report.id}`} className="record-open">Open analysis <ArrowUpRight size={14} /></Link></div></div>
+                  <div className="record-footer"><span className="record-model">{report.model_version?.includes('Grad-CAM++') ? 'DenseNet121 · RBF-SVM' : (report.model_version || 'CXR analysis')}</span><div className="record-actions"><Link to={`/gradcam/${report.id}`} title="Open Grad-CAM++" aria-label={`Open Grad-CAM++ for ${report.patient_name}`}><Eye size={15} /></Link><Link to={`/report/${report.id}`} title="Open report" aria-label={`Open report for ${report.patient_name}`}><FileText size={15} /></Link><a href={resolveBackendUrl(report.pdf_url)} target="_blank" rel="noreferrer" title="Download PDF" aria-label={`Download PDF for ${report.patient_name}`}><Download size={15} /></a><Link to={`/results/${report.id}`} className="record-open">Open analysis <ArrowUpRight size={14} /></Link></div></div>
                 </article>
               );
             })}

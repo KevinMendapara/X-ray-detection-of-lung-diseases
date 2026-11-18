@@ -2,6 +2,15 @@ import axios from 'axios';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').trim().replace(/\/+$/, '');
 
+const API_ORIGIN = /^https?:\/\//i.test(API_BASE) ? new URL(API_BASE).origin : '';
+
+export const resolveBackendUrl = (url) => {
+  if (!url) return '';
+  if (/^(?:https?:)?\/\//i.test(url) || /^(?:data|blob):/i.test(url)) return url;
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${API_ORIGIN}${path}`;
+};
+
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
@@ -131,7 +140,7 @@ export const reportsAPI = {
     const res = await api.get(`/reports/${id}`);
     return res.data;
   },
-  getPdfUrl: (id) => `/api/reports/${id}/pdf`
+  getPdfUrl: (id) => resolveBackendUrl(`/api/reports/${id}/pdf`)
 };
 
 export const contactAPI = {

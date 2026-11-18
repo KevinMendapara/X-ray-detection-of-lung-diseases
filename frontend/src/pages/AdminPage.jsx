@@ -9,7 +9,6 @@ import { adminAPI, authAPI } from '../services/api';
 
 export default function AdminPage() {
   const [stats, setStats] = useState(null);
-  const [metrics, setMetrics] = useState(null);
   const [logs, setLogs] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,14 +23,12 @@ export default function AdminPage() {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [statsRes, metricsRes, logsRes, usersRes] = await Promise.all([
+      const [statsRes, logsRes, usersRes] = await Promise.all([
         adminAPI.getStats().catch(() => ({})),
-        adminAPI.getMetrics().catch(() => ({})),
         adminAPI.getLogs().catch(() => []),
         adminAPI.getUsers().catch(() => [])
       ]);
       setStats(statsRes);
-      setMetrics(metricsRes);
       setLogs(logsRes || []);
       setUsers(usersRes || []);
     } finally {
@@ -48,8 +45,6 @@ export default function AdminPage() {
     );
   }
 
-  const evalMetrics = metrics?.evaluation || {};
-  const cm = evalMetrics?.confusion_matrix || { true_negative: 47, false_positive: 0, false_negative: 0, true_positive: 57 };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -65,7 +60,7 @@ export default function AdminPage() {
             System Administration & Model Audit
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Real-time verification of DenseNet121 + SVM performance, ICMR dataset provenance, and access audit logs.
+            Review the model pipeline, dataset provenance, and access audit logs. Performance is withheld pending independent validation.
           </p>
         </div>
 
@@ -93,7 +88,7 @@ export default function AdminPage() {
             activeTab === 'performance' ? 'bg-[#1769AA] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          Model Evaluation & Confusion Matrix
+          Model architecture
         </button>
         <button
           onClick={() => setActiveTab('dataset')}
@@ -123,151 +118,21 @@ export default function AdminPage() {
 
       {/* Tab 1: Model Performance & Confusion Matrix */}
       {activeTab === 'performance' && (
-        <div className="space-y-8 animate-in fade-in">
-          
-          {/* Top KPI Metric Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-[#1769AA]">
-                {evalMetrics.accuracy ? (evalMetrics.accuracy * 100).toFixed(1) : 100}%
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">Hold-out Accuracy</div>
-              <div className="text-[10px] text-slate-400">Independent ICMR Set</div>
+        <div className="space-y-6 animate-in fade-in">
+          <div className="health-card p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-[#17A2A4]" />Model Pipeline & Hyperparameters</h3>
+              <span className="text-[10px] font-mono text-slate-400">PulmoVision research model</span>
             </div>
-
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-[#17A2A4]">
-                {evalMetrics.sensitivity ? (evalMetrics.sensitivity * 100).toFixed(1) : 100}%
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">Sensitivity / Recall</div>
-              <div className="text-[10px] text-slate-400">TP / (TP + FN)</div>
-            </div>
-
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-indigo-600">
-                {evalMetrics.specificity ? (evalMetrics.specificity * 100).toFixed(1) : 100}%
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">Specificity (TNR)</div>
-              <div className="text-[10px] text-slate-400">TN / (TN + FP)</div>
-            </div>
-
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-emerald-600">
-                {evalMetrics.precision ? (evalMetrics.precision * 100).toFixed(1) : 100}%
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">Precision (PPV)</div>
-              <div className="text-[10px] text-slate-400">TP / (TP + FP)</div>
-            </div>
-
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-purple-600">
-                {evalMetrics.f1_score ? evalMetrics.f1_score.toFixed(4) : '1.0000'}
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">F1-Score</div>
-              <div className="text-[10px] text-slate-400">Harmonic Mean</div>
-            </div>
-
-            <div className="health-card p-4 text-center">
-              <div className="text-2xl font-extrabold text-blue-600">
-                {evalMetrics.roc_auc ? evalMetrics.roc_auc.toFixed(4) : '1.0000'}
-              </div>
-              <div className="text-[11px] font-bold text-slate-700 mt-1">ROC-AUC</div>
-              <div className="text-[10px] text-slate-400">Area Under Curve</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 space-y-2.5 text-xs">
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Feature extractor:</span><span className="font-semibold text-slate-800">DenseNet121</span></div>
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Feature vector:</span><span className="font-mono text-slate-800">Global pooling (1,024 dimensions)</span></div>
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Classifier:</span><span className="font-semibold text-slate-800">RBF-kernel SVM</span></div>
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Regularization:</span><span className="font-mono text-slate-800">C = 1.0</span></div>
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Probability calibration:</span><span className="text-slate-800">Validation split</span></div>
+              <div className="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span className="text-slate-500">Explanation method:</span><span className="font-semibold text-slate-800">Grad-CAM++</span></div>
             </div>
           </div>
-
-          {/* Confusion Matrix & ROC Curve Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            
-            {/* Confusion Matrix (6 Cols) */}
-            <div className="md:col-span-6 health-card p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-[#1769AA]" />
-                  Held-out Confusion Matrix (ICMR test split)
-                </h3>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-[#1769AA] font-bold">
-                  N = {evalMetrics.test_samples || 104} Test Cases
-                </span>
-              </div>
-
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div></div>
-                  <div className="font-bold text-slate-600">Predicted Normal</div>
-                  <div className="font-bold text-slate-600">Predicted TB</div>
-
-                  <div className="font-bold text-slate-600 self-center text-right pr-2">Actual Normal</div>
-                  <div className="p-4 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold text-xl shadow-sm">
-                    {cm.true_negative}
-                    <span className="block text-[10px] font-normal text-emerald-700">True Negative (TN)</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 font-extrabold text-xl">
-                    {cm.false_positive}
-                    <span className="block text-[10px] font-normal text-slate-400">False Positive (FP)</span>
-                  </div>
-
-                  <div className="font-bold text-slate-600 self-center text-right pr-2">Actual TB Positive</div>
-                  <div className="p-4 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 font-extrabold text-xl">
-                    {cm.false_negative}
-                    <span className="block text-[10px] font-normal text-slate-400">False Negative (FN)</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-rose-100 text-rose-900 border border-rose-300 font-extrabold text-xl shadow-sm">
-                    {cm.true_positive}
-                    <span className="block text-[10px] font-normal text-rose-700">True Positive (TP)</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-[11px] text-slate-500 leading-relaxed">
-                This held-out split had zero false negatives. This dataset result is not an external clinical validation or a diagnosis.
-              </div>
-            </div>
-
-            {/* Model Architecture & Hyperparameters (6 Cols) */}
-            <div className="md:col-span-6 health-card p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-[#17A2A4]" />
-                  Model Pipeline & Hyperparameters
-                </h3>
-                <span className="text-[10px] font-mono text-slate-400">DenseNet121-SVM-v2.0</span>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Base Architecture:</span>
-                  <span className="font-semibold text-slate-800">DenseNet121 (ImageNet Deep Representations)</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Feature Extraction Layer:</span>
-                  <span className="font-mono text-slate-800">GlobalAveragePooling2D (1,024-dim)</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Classifier:</span>
-                  <span className="font-semibold text-slate-800">Support Vector Machine (SVC)</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">SVM Kernel:</span>
-                  <span className="font-mono text-[#1769AA] font-bold">RBF (Radial Basis Function)</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Regularization Parameter (C):</span>
-                  <span className="font-mono text-slate-800">1.0</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Hyperparameter Search:</span>
-                  <span className="text-slate-800">SMO optimization; probability calibration on validation split</span>
-                </div>
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">XAI Differentiation Target:</span>
-                  <span className="text-slate-800 font-semibold">Grad-CAM++ Analytical Higher-Order Gradients</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
         </div>
       )}
 
@@ -283,7 +148,7 @@ export default function AdminPage() {
               Indian Council of Medical Research (ICMR) - NIRT Tuberculosis Registry
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Trained on standardized clinical chest radiographs from the Indian National Tuberculosis Registry. Patient-level splitting keeps studies from the same patient out of multiple partitions. Reported metrics are from a held-out split of this cohort, not external clinical validation.
+              Trained on standardized clinical chest radiographs from the Indian National Tuberculosis Registry. Patient-level splitting keeps studies from the same patient out of multiple partitions.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-xs">
@@ -300,7 +165,7 @@ export default function AdminPage() {
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <span className="text-slate-400 block text-[11px]">Held-out Test Set (15%):</span>
                 <strong className="text-lg text-[#1769AA] block">104 Radiographs</strong>
-                <span className="text-slate-500 text-[10px]">Held-out evaluation</span>
+                <span className="text-slate-500 text-[10px]">Internal holdout partition</span>
               </div>
             </div>
 

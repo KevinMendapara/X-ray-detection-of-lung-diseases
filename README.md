@@ -101,21 +101,11 @@ The application utilizes a **hybrid machine learning architecture**:
 The system was trained and evaluated on authentic clinical chest radiographs from the **Indian Council of Medical Research (ICMR) – National Institute for Research in Tuberculosis (NIRT)** national registry:
 - **Normal Control Cohort:** `intbtr99` (307 radiographs)
 - **Pulmonary TB Cohort:** `intbtr253` (377 radiographs)
-- **Dataset Partition:** Patient-level stratified split across all 684 radiographs (70% Train: 477, 15% Validation: 103, 15% Held-out Test: 104).
+- **Dataset Partition:** Patient-level stratified split across 684 radiographs (477 train, 103 validation, 104 internal holdout).
 
-### Held-Out Split Evaluation Results (104 cases)
-*These metrics were calculated on unseen patients from the same cohort. This is a dataset hold-out result, not external clinical validation:*
+### Evaluation Status
 
-| Metric | Hold-out Value | Clinical Significance |
-| :--- | :---: | :--- |
-| **Accuracy** | **100.00%** | Overall correct classification rate |
-| **Sensitivity (Recall)** | **100.00%** | No false negatives observed in this held-out split; this does not establish clinical sensitivity |
-| **Specificity (TNR)** | **100.00%** | No false positives observed in this held-out split |
-| **Precision (PPV)** | **100.00%** | Positive predictive value on this held-out split |
-| **F1-Score** | **1.0000** | Harmonic balance between precision & recall |
-| **ROC-AUC** | **1.0000** | Ranking performance within this held-out split |
-| **Confusion Matrix** | **TN=47, FP=0, FN=0, TP=57** | Held-out test split ($N=104$) |
-
+The repository contains an internal patient-level holdout from the same INTBTR cohort. Reproducing that split is not external validation and does not establish performance on new hospitals, scanners, or populations. For that reason, the application does **not report accuracy, precision, F1, or ROC-AUC as generalization scores**. An independently sourced external cohort and a documented evaluation protocol are required before those scores can be presented. This project is an academic prototype, not a diagnostic device.
 ---
 
 ## 5. All 12 Completed Website Pages
@@ -124,7 +114,7 @@ The system was trained and evaluated on authentic clinical chest radiographs fro
    - Professional healthcare-themed hero section: *"AI-Powered Tuberculosis Detection Through Chest X-Ray Analysis"*
    - DenseNet121 + SVM + Grad-CAM++ feature breakdown
    - Quick "Upload X-Ray" & "Learn More" call-to-actions
-   - Verified ICMR performance telemetry statistics
+   - Transparent model-evaluation status and validation limitations
    - Interactive 4-step pipeline workflow illustration
    - Regulatory medical disclaimer banner & comprehensive footer
 
@@ -141,7 +131,7 @@ The system was trained and evaluated on authentic clinical chest radiographs fro
    - Secure input validation and immediate one-click redirection to CXR upload
 
 4. **Page 4: Patient Dashboard (`/dashboard`)**
-   - KPI metrics: Total Enrolled Patients, Analyses Performed, TB Suspected, Normal Controls, Hold-out Accuracy
+   - KPI metrics: Total Enrolled Patients, Analyses Performed, TB Suspected, Normal Controls, External validation status
    - Patient directory with live search and filter
    - Recent analysis activity feed with visual overlay thumbnails and report links
 
@@ -203,7 +193,7 @@ The system was trained and evaluated on authentic clinical chest radiographs fro
 
 12. **Page 12: Admin Dashboard (`/admin`)**
     - Role-based clinical governance console
-    - Held-out Confusion Matrix visualizer ($N=104$)
+    - Evaluation status panel; performance scores withheld pending external validation
     - Hyperparameter audit (RBF Kernel, $C=1.0$, $\gamma=\text{scale}$)
     - ICMR dataset partition telemetry (477 train, 103 val, 104 test)
     - Full system audit trail log
@@ -228,8 +218,8 @@ The system was trained and evaluated on authentic clinical chest radiographs fro
 | `GET` | `/api/reports` | List historical analysis reports with filters |
 | `GET` | `/api/reports/{id}` | Retrieve full report details (JSON) |
 | `GET` | `/api/reports/{id}/pdf` | Download official PDF medical report |
-| `GET` | `/api/dashboard/stats` | System KPIs, model evaluation metrics, and demographic data |
-| `GET` | `/api/admin/metrics` | Full model parameters, confusion matrix, and ROC curve |
+| `GET` | `/api/dashboard/stats` | System KPIs, evaluation status, and demographic data |
+| `GET` | `/api/admin/metrics` | Model metadata and external-validation status; unvalidated scores are withheld |
 | `GET` | `/api/admin/logs` | Security & operational audit trail |
 | `GET` | `/api/health` | Service health status |
 

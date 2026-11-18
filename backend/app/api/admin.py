@@ -26,6 +26,18 @@ router = APIRouter(prefix="/api/admin", tags=["Admin & System"])
 
 METRICS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models", "model_metrics.json"))
 
+
+def public_model_metrics(metrics):
+    """Expose model metadata without treating a same-cohort holdout as generalizable performance."""
+    public_metrics = dict(metrics or {})
+    raw_evaluation = public_metrics.get("evaluation") or {}
+    public_metrics["evaluation"] = {
+        "status": "pending_external_validation",
+        "test_samples": raw_evaluation.get("test_samples"),
+        "message": "No generalization score is reported until an external cohort is evaluated.",
+    }
+    return public_metrics
+
 def fetch_dashboard_stats():
     conn = get_connection()
     c = conn.cursor()
@@ -70,6 +82,8 @@ def fetch_dashboard_stats():
         with open(METRICS_PATH, "r") as f:
             verified_metrics = json.load(f)
 
+    public_metrics = public_model_metrics(verified_metrics)
+
     return {
         "kpis": {
             "total_patients": total_patients,
@@ -79,12 +93,13 @@ def fetch_dashboard_stats():
             "inconclusive_cases": inconclusive_cases,
             "pending_analyses": pending_reviews,
             "pending_reviews": pending_reviews,
-            "model_accuracy_pct": verified_metrics.get("evaluation", {}).get("accuracy", 1.0) * 100,
-            "model_sensitivity_pct": verified_metrics.get("evaluation", {}).get("sensitivity", 1.0) * 100,
-            "model_specificity_pct": verified_metrics.get("evaluation", {}).get("specificity", 1.0) * 100,
-            "roc_auc": verified_metrics.get("evaluation", {}).get("roc_auc", 1.0)
+            "model_accuracy_pct": None,
+            "model_sensitivity_pct": None,
+            "model_specificity_pct": None,
+            "roc_auc": None,
+            "model_evaluation_status": public_metrics["evaluation"]["status"]
         },
-        "model_performance": verified_metrics,
+        "model_performance": public_metrics,
         "demographics": {
             "gender_distribution": gender_counts
         },
@@ -99,8 +114,8 @@ def get_dashboard_stats():
 def get_model_metrics():
     if os.path.exists(METRICS_PATH):
         with open(METRICS_PATH, "r") as f:
-            return json.load(f)
-    return {"status": "Model metrics file not found"}
+            return public_model_metrics(json.load(f))
+    return {"status": "Model metrics file not found", "evaluation": {"status": "pending_external_validation"}}
 
 @router.get("/logs")
 def get_audit_logs(limit: int = 50):

@@ -5,7 +5,7 @@ import {
   CheckCircle2, AlertTriangle, AlertCircle, Shield, User,
   Calendar, Layers, Stethoscope, Heart, RefreshCw, ChevronRight, Save
 } from 'lucide-react';
-import { reportsAPI } from '../services/api';
+import { reportsAPI, resolveBackendUrl } from '../services/api';
 
 export default function ReportDetailPage() {
   const { id } = useParams();
@@ -30,8 +30,8 @@ export default function ReportDetailPage() {
       setReport(data);
       setReviewStatus(data.review?.status || 'Pending Review');
       setClinicianNotes(data.review?.clinician_notes || '');
-    } catch {
-      setError('Could not load analysis report.');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Could not load analysis report. The analysis may no longer be stored on the backend.');
     } finally {
       setLoading(false);
     }
@@ -111,7 +111,7 @@ export default function ReportDetailPage() {
             Print Report
           </button>
           <a
-            href={report.pdf_download_url}
+            href={resolveBackendUrl(report.pdf_download_url)}
             target="_blank"
             rel="noreferrer"
             className="btn-primary text-xs px-4 py-2 shadow-sm"
@@ -235,7 +235,7 @@ export default function ReportDetailPage() {
           <div className="grid grid-cols-3 gap-4 text-center text-xs">
             <div className="space-y-1.5">
               <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-square flex items-center justify-center">
-                <img src={xray.processed_image_url} alt="Preprocessed CXR" className="w-full h-full object-contain" />
+                <img src={resolveBackendUrl(xray.processed_image_url)} alt="Preprocessed CXR" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-slate-700 block">Preprocessed CXR</span>
               <span className="text-[10px] text-slate-400">224x224 Windowed</span>
@@ -243,7 +243,7 @@ export default function ReportDetailPage() {
 
             <div className="space-y-1.5">
               <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-square flex items-center justify-center">
-                <img src={xray.heatmap_image_url} alt="Pure CAM" className="w-full h-full object-contain" />
+                <img src={resolveBackendUrl(xray.heatmap_image_url)} alt="Pure CAM" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-slate-700 block">Grad-CAM++ Heatmap</span>
               <span className="text-[10px] text-slate-400">Blue (Low) to Red (High)</span>
@@ -251,7 +251,7 @@ export default function ReportDetailPage() {
 
             <div className="space-y-1.5">
               <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-square flex items-center justify-center">
-                <img src={xray.overlay_image_url} alt="CXR Overlay" className="w-full h-full object-contain" />
+                <img src={resolveBackendUrl(xray.overlay_image_url)} alt="CXR Overlay" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-[#17A2A4] block">Heatmap Overlay</span>
               <span className="text-[10px] text-slate-400">60% CXR + 40% CAM</span>

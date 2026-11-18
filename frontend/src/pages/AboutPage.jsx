@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Activity, Layers, Cpu, Eye, FileText, CheckCircle2,
-  AlertCircle, ShieldCheck, Database, Award, ArrowRight, BarChart3
+  AlertCircle, ShieldCheck, Database, Award, ArrowRight
 } from 'lucide-react';
-import { adminAPI } from '../services/api';
 
 export default function AboutPage() {
-  const [metrics, setMetrics] = useState(null);
-  useEffect(() => { adminAPI.getMetrics().then(setMetrics).catch(() => setMetrics(null)); }, []);
-  const evaluation = metrics?.evaluation || {};
-  const percent = (value) => Number.isFinite(Number(value)) ? `${(Number(value) * 100).toFixed(1)}%` : '—';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
@@ -28,13 +23,6 @@ export default function AboutPage() {
           An explainable medical AI research project combining DenseNet121 deep convolutional feature extraction, Support Vector Machine (SVM) decision hyperplanes, and Grad-CAM++ transparent attention mapping for pulmonary tuberculosis screening.
         </p>
       </div>
-
-      {/* Model Transparency & Evaluation Context */}
-      <section className="health-card p-6 sm:p-7 space-y-5" aria-labelledby="evaluation-context-heading">
-        <div className="flex items-start gap-3"><span className="w-10 h-10 rounded-xl bg-teal-50 text-[#17A2A4] flex items-center justify-center shrink-0"><BarChart3 className="w-5 h-5" /></span><div><div className="text-[10px] uppercase tracking-wider font-bold text-[#17A2A4]">MODEL TRANSPARENCY</div><h2 id="evaluation-context-heading" className="text-lg font-extrabold text-[#183153] mt-1">Held-out evaluation snapshot</h2><p className="text-xs text-slate-500 mt-1">Metrics loaded from this project’s saved evaluation record.</p></div></div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">{[['Test images', evaluation.test_samples ?? '—'], ['Accuracy', percent(evaluation.accuracy)], ['Sensitivity', percent(evaluation.sensitivity ?? evaluation.recall)], ['Specificity', percent(evaluation.specificity)], ['Precision', percent(evaluation.precision)], ['ROC–AUC', Number.isFinite(Number(evaluation.roc_auc)) ? Number(evaluation.roc_auc).toFixed(3) : '—']].map(([label,value]) => <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 p-3"><div className="text-[9px] text-slate-500">{label}</div><strong className="mt-1 block text-lg text-[#203f55]">{value}</strong></div>)}</div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-3 text-[10px] leading-relaxed text-amber-900"><strong>Evaluation context:</strong> {metrics?.dataset_name || 'ICMR–NIRT INTBTR cohort'} · {evaluation.test_samples ?? '—'} held-out test images ({evaluation.confusion_matrix?.true_negative ?? '—'} true negatives, {evaluation.confusion_matrix?.false_positive ?? '—'} false positives, {evaluation.confusion_matrix?.false_negative ?? '—'} false negatives, {evaluation.confusion_matrix?.true_positive ?? '—'} true positives). These are results from the saved project evaluation and do not establish performance on other hospitals, scanners, or populations; independent external validation is needed. This research prototype is not a diagnostic device.</div>
-      </section>
 
       {/* Problem Statement & Objectives */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -71,10 +59,6 @@ export default function AboutPage() {
               <CheckCircle2 className="w-4 h-4 text-[#17A2A4] flex-shrink-0 mt-0.5" />
               <span><strong>Hybrid Architecture:</strong> Exploit the strengths of deep convolutional representations (DenseNet121) coupled with maximum-margin SVM classifiers.</span>
             </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#17A2A4] flex-shrink-0 mt-0.5" />
-              <span><strong>Authentic Validation:</strong> Validate on verified Indian Council of Medical Research (ICMR) clinical cohorts rather than synthetic data.</span>
-            </li>
           </ul>
         </div>
       </div>
@@ -109,7 +93,7 @@ export default function AboutPage() {
             </div>
             <h3 className="font-bold text-slate-800 text-sm">2. Support Vector Machine (Classifier)</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              SVM constructs optimal hyperplanes that maximize the geometric margin between positive TB and normal control features in high-dimensional Hilbert space. Using an RBF kernel, SVM resists overfitting on medical cohorts and provides well-calibrated confidence estimates.
+              SVM constructs a decision boundary between TB-positive and normal-control feature vectors. This project uses an RBF kernel with probability calibration; calibrated outputs do not establish clinical accuracy or generalization.
             </p>
             <div className="text-[11px] font-semibold text-[#17A2A4] pt-2">
               Kernel: RBF • Hyperparameters tuned via 5-Fold CV
@@ -139,14 +123,14 @@ export default function AboutPage() {
           <div className="lg:col-span-8 space-y-3">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#17A2A4] uppercase tracking-wider">
               <Database className="w-4 h-4" />
-              Dataset Authenticity & Validation
+              Dataset Sources & Partitions
             </div>
             <h3 className="text-xl font-bold text-white">ICMR-NIRT National Tuberculosis CXR Registry</h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               The model is trained and evaluated on authentic clinical chest radiographs from the Indian Council of Medical Research (ICMR) and National Institute for Research in Tuberculosis (NIRT), specifically the INTBTR cohort (intbtr99 normal controls & intbtr253 confirmed pulmonary tuberculosis cases).
             </p>
             <p className="text-xs text-slate-400">
-              Strict patient-level data partitioning (70% train, 15% validation, 15% independent test) was maintained to prevent data leakage and guarantee genuine real-world generalization.
+              The dataset was divided at patient level into training, validation, and internal holdout partitions to reduce overlap between splits.
             </p>
           </div>
           <div className="lg:col-span-4 bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3 text-xs">
@@ -161,10 +145,6 @@ export default function AboutPage() {
             <div className="flex justify-between border-b border-slate-700 pb-2">
               <span className="text-slate-400">TB Positive:</span>
               <span className="font-bold text-rose-400">377 Cases</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Independent Test AUC:</span>
-              <span className="font-bold text-[#17A2A4]">{Number.isFinite(Number(evaluation.roc_auc)) ? Number(evaluation.roc_auc).toFixed(4) : '—'}</span>
             </div>
           </div>
         </div>
