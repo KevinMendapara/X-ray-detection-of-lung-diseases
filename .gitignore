@@ -26,3 +26,6 @@ ml/processed_dataset/
 frontend/public/sample_xrays/
 backend/models/*.h5
 backend/models/*.joblib
+!backend/models/densenet121_weights.h5
+!backend/models/svm_tb_classifier.joblib
+!backend/models/scaler.joblib

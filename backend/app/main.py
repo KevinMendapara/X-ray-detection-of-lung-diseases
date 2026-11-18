@@ -103,6 +103,17 @@ def health_check():
         "dataset": "ICMR-NIRT National Tuberculosis CXR Registry"
     }
 
+@app.get("/api/health/model")
+def model_health_check():
+    try:
+        from backend.app.services.ml_engine import get_ml_engine
+    except ImportError:
+        from app.services.ml_engine import get_ml_engine
+    engine = get_ml_engine()
+    status = engine.get_model_status()
+    return {"status": "ready" if status["ready"] else "unavailable", "model": status}
+
+
 # Mount compiled frontend at the end (catch-all for SPA routes)
 if os.path.exists(FRONTEND_DIST):
     app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")

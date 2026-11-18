@@ -5,7 +5,7 @@ import cv2
 from PIL import Image
 import joblib
 
-os.environ['KERAS_HOME'] = r'C:\Users\Hp\.keras'
+os.environ.setdefault('KERAS_HOME', os.path.join(os.path.expanduser('~'), '.keras'))
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 tf = None
@@ -45,6 +45,12 @@ class MLEngine:
         metrics_path = os.path.join(base_dir, "models", "model_metrics.json")
 
         self.feature_model = None
+        self.model_artifacts = {
+            "densenet_weights": os.path.exists(weights_path),
+            "svm_classifier": os.path.exists(svm_path),
+            "feature_scaler": os.path.exists(scaler_path),
+            "tensorflow_runtime": tf is not None and DenseNet121 is not None,
+        }
         if tf is not None and DenseNet121 is not None:
             try:
                 self.densenet_full = DenseNet121(weights=None, include_top=False, input_shape=(224, 224, 3))
@@ -60,9 +66,13 @@ class MLEngine:
                 print(f"Warning: Could not build full DenseNet graph: {e}")
 
         # 2. Load SVM & Scaler
-        self.svm = joblib.load(svm_path) if os.path.exists(svm_path) else None
-        self.scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
-        print("Loaded trained SVM classifier & StandardScaler.")
+        self.svm = joblib.load(svm_path) if self.model_artifacts["svm_classifier"] else None
+        self.scaler = joblib.load(scaler_path) if self.model_artifacts["feature_scaler"] else None
+        missing = [name for name, present in self.model_artifacts.items() if not present]
+        if missing:
+            print("Model unavailable; missing runtime/artifacts:", ", ".join(missing))
+        else:
+            print("Loaded DenseNet121 weights, trained SVM classifier, and feature scaler.")
 
         # 3. Load Metrics
         if os.path.exists(metrics_path):
@@ -70,6 +80,12 @@ class MLEngine:
                 self.metrics = json.load(f)
         else:
             self.metrics = {}
+
+    def get_model_status(self):
+        """Return whether all artifacts required for trained inference are available."""
+        status = dict(self.model_artifacts)
+        status["ready"] = all(status.values()) and self.feature_model is not None and self.svm is not None and self.scaler is not None
+        return status
 
     def preprocess_image(self, img_path, target_size=(224, 224)):
         img = Image.open(img_path).convert('RGB')
